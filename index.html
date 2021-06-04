@@ -6,13 +6,13 @@
     <script type="module">
         import { MazeRenderer } from './renderer.js';
         import { SquareMaze } from './graph.js';
-        import { randomGenerator } from './algorithms.js';
+        import { randomGenerator, randomDepthFirstSearchGenerator } from './algorithms.js';
 
-        const maze = new SquareMaze(10, 20);
+        const maze = new SquareMaze(20, 20);
         const renderer = new MazeRenderer(document.querySelector('canvas'), maze);
         renderer.init();
 
-        const algorithm = randomGenerator(maze);
+        const algorithm = randomDepthFirstSearchGenerator(maze);
         let isDone = false;
         let interval;
         function step() {
@@ -25,6 +25,6 @@
             const toHighlight = step.value;
             renderer.render(toHighlight ? toHighlight : []);
         }
-        interval = window.setInterval(step, 300);
+        interval = window.setInterval(step, 200);
     </script>
 </html>
