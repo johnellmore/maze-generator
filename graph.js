@@ -27,57 +27,72 @@ export class SquareMaze {
 }
 
 export class MazeCellBoundary {
-    _cell;
-    _side; // n, s, e, w
+    _graph;
+    _firstId;
+    _secondId;
 
-    constructor(cell, side) {
-        this._cell = cell;
-        this._side = side;
+    constructor(graph, firstId, secondId) {
+        this._graph = graph;
+        // make sure that cellA is always the cell with the lower ID (makes it
+        // easier to check if two boundary instances are actually the same)
+        if (firstId < secondId) {
+            this._firstId = firstId;
+            this._secondId = secondId;
+        } else {
+            this._firstId = secondId;
+            this._secondId = firstId;
+        }
     }
 
-    get cell() {
-        return this._cell;
+    get firstId() {
+        return this._firstId;
     }
 
-    get side() {
-        return this._side;
+    get secondId() {
+        return this._secondId;
     }
 
     get isWall() {
-        return this.cell.graph.isWall(this);
+        return this._graph.isWall(this);
     }
 
     set isWall(newValue) {
-        this.cell.graph.setWall(this, newValue);
+        this._graph.setWall(this, newValue);
+    }
+
+    traverseFrom(cell) {
+        if (cell.id === this.firstId) {
+            return new MazeCell(this._graph, this.secondId);
+        } else {
+            return new MazeCell(this._graph, this.firstId);
+        }
     }
 }
 
-export class SquareMazeCell {
+export class MazeCell {
     _graph;
-    _x; // from left
-    _y; // from top
+    _id;
 
-    constructor(graph, x, y) {
+    constructor(graph, id) {
         this._graph = graph;
-        this._x = x;
-        this._y = y;
+        this._id = id;
     }
 
     get graph() {
         return this._graph;
     }
 
-    get x() {
-        return this._x;
-    }
-
-    get y() {
-        return this._y;
+    get id() {
+        return this._id;
     }
 
     get boundaries() {
-        return this._graph.getCellBoundarySides(this._x, this._y)
-            .map(side => new MazeCellBoundary(this, side));
+        return this._graph.getNeighborIds(this._id)
+            .map(neighborId => new MazeCellBoundary(
+                this._graph,
+                this._id,
+                neighborId
+            ))
     }
 }
 
@@ -102,68 +117,47 @@ export class SquareMazeGraph {
     }
 
     cells() {
-        const c = Array(this._width * this._height);
-        for (let y = 0; y < this._height; y++) {
-            for (let x = 0; x < this._width; x++) {
-                const addr = x + y * this._width;
-                c[addr] = this.getCell(x, y);
-            }
-        }
-        return c;
+        // generate a range from [0..n]
+        return [...Array(this._width * this._height).keys()]
+            .map(id => new MazeCell(this, id));
     }
 
     boundaries() {
         return this.cells().flatMap(cell =>
-            cell.boundaries.filter(b => ['n', 'w'].includes(b.side))
+            cell.boundaries.filter(b => b.firstId === cell.id)
         );
-    }
-
-    getCell(x, y) {
-        if (x >= this._width || x < 0) {
-            throw new Error('Cell x is out of bounds');
-        } else if (y >= this._height || y < 0) {
-            throw new Error('Cell y is out of bounds');
-        }
-        return new SquareMazeCell(this, x, y);
     }
 
     isWall(boundary) {
         const addr = this._getWallAddress(
-            boundary.cell.x,
-            boundary.cell.y,
-            boundary.side
+            boundary.firstId,
+            boundary.secondId,
         );
         return !!this._edges[addr];
     }
 
     setWall(boundary, shouldBeWall) {
         const addr = this._getWallAddress(
-            boundary.cell.x,
-            boundary.cell.y,
-            boundary.side
+            boundary.firstId,
+            boundary.secondId,
         );
         this._edges[addr] = shouldBeWall ? 1 : 0;
     }
 
-    getCellBoundarySides(x, y) {
+    getNeighborIds(id) {
+        const x = id % this._width;
+        const y = Math.floor(id / this._width);
+        const toAddr = (x, y) => x + y * this._width;
         return [
-            x > 0 ? 'w' : null,
-            y > 0 ? 'n' : null,
-            x < (this._width - 1) ? 'e' : null,
-            y < (this._height - 1) ? 's' : null,
+            x > 0 ? toAddr(x - 1, y) : null,
+            y > 0 ? toAddr(x, y - 1) : null,
+            x < (this._width - 1) ? toAddr(x + 1, y) : null,
+            y < (this._height - 1) ? toAddr(x, y + 1) : null,
         ].filter(x => !!x);
     }
 
-    _getWallAddress(x, y, side) {
-        if (!['n', 'e', 's', 'w'].includes(side)) {
-            throw new Error('Invalid side');
-        }
-        if (side === 'e') {
-            return this._getWallAddress(x + 1, y, 'w');
-        }
-        if (side === 's') {
-            return this._getWallAddress(x, y + 1, 'n');
-        }
-        return (x + y * this._width) * 2 + (side === 'n' ? 1 : 0);
+    _getWallAddress(smallerCellId, largerCellId) {
+        const areCellHorizontallyAdjacent = largerCellId - smallerCellId === 1;
+        return smallerCellId * 2 + (areCellHorizontallyAdjacent ? 1 : 0);
     }
 }

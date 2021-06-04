@@ -1,4 +1,4 @@
-import { MazeCellBoundary, SquareMazeCell } from './graph.js';
+import { MazeCell, MazeCellBoundary } from './graph.js';
 
 const cellSize = 20;
 
@@ -14,30 +14,57 @@ export class MazeRenderer {
     init() {
         const ctx = this._canvas.getContext('2d');
         ctx.translate(1, 1);
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = 'black';
     }
 
     render(toHighlight) {
         const ctx = this._canvas.getContext('2d');
 
+        const cellIdToXY = (id) => [
+            id % this._maze.width,
+            Math.floor(id / this._maze.width)
+        ];
+        const boundaryToEndpoints = (boundary) => {
+            if (boundary.secondId - boundary.firstId === 1) {
+                // cells are horizontally adjacent
+                const [ cellX, cellY ] = cellIdToXY(boundary.secondId);
+                return [
+                    [ cellX * cellSize, cellY * cellSize],
+                    [ cellX * cellSize, (cellY + 1) * cellSize],
+                ];
+            } else {
+                // cells are vertically adjacent
+                const [ cellX, cellY ] = cellIdToXY(boundary.secondId);
+                return [
+                    [ cellX * cellSize, cellY * cellSize],
+                    [ (cellX + 1) * cellSize, cellY * cellSize],
+                ];
+            }
+        }
+        const strokeLine = (a, b) => {
+            ctx.beginPath();
+            ctx.moveTo(a[0], a[1]);
+            ctx.lineTo(b[0], b[1]);
+            ctx.stroke();
+        }
+
         // clear canvas
         ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
 
         // draw any highlights behind cells
-        ctx.fillStyle = 'yellow';
+        ctx.fillStyle = 'orange';
         toHighlight.forEach(obj => {
-            if (obj instanceof SquareMazeCell) {
-                ctx.fillRect(obj.x * cellSize, obj.y * cellSize, cellSize, cellSize);
+            if (obj instanceof MazeCell) {
+                const { cellX, cellY } = cellIdToXY(obj.id);
+                ctx.fillRect(cellX * cellSize, cellY * cellSize, cellSize, cellSize);
             }
         });
 
         // draw any highlights behind walls
-        ctx.strokeStyle = 'yellow';
+        ctx.strokeStyle = 'orange';
         ctx.lineWidth = 4;
         toHighlight.forEach(obj => {
             if (obj instanceof MazeCellBoundary) {
-                this.strokeBoundaryPath(obj);
+                strokeLine(...boundaryToEndpoints(obj));
             }
         });
 
@@ -47,38 +74,9 @@ export class MazeRenderer {
         ctx.strokeRect(0, 0, this._maze.width * cellSize, this._maze.height * cellSize);
 
         // draw each wall
-        for (const cell of this._maze.cells()) {
-            const boundariesToDraw = cell.boundaries
-                .filter(b => ['n', 'w'].includes(b.side))
-                .filter(b => b.isWall)
-            for (const boundary of boundariesToDraw) {
-                this.strokeBoundaryPath(boundary);
-            }
+        const walls = this._maze.graph.boundaries().filter(b => b.isWall);
+        for (const boundary of walls) {
+            strokeLine(...boundaryToEndpoints(boundary));
         }
-    }
-
-    strokeBoundaryPath(boundary) {
-        const ctx = this._canvas.getContext('2d');
-        const side = boundary.side;
-        const top = boundary.cell.y * cellSize;
-        const right = (boundary.cell.x + 1) * cellSize;
-        const bottom = (boundary.cell.y + 1) * cellSize;
-        const left = boundary.cell.x * cellSize;
-
-        ctx.beginPath();
-
-        if (side === 'n' || side === 'w') {
-            ctx.moveTo(left, top);
-        } else {
-            ctx.moveTo(right, bottom);
-        }
-
-        if (side === 'n' || side === 'e') {
-            ctx.lineTo(right, top);
-        } else {
-            ctx.lineTo(left, bottom);
-        }
-
-        ctx.stroke();
     }
 }
