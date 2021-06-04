@@ -1,0 +1,30 @@
+<!doctype html>
+<meta charset="utf-8" />
+<link rel="icon" href="data:,">
+<html lang="en">
+    <canvas width="600" height="600"></canvas>
+    <script type="module">
+        import { MazeRenderer } from './renderer.js';
+        import { SquareMaze } from './graph.js';
+        import { randomGenerator } from './algorithms.js';
+
+        const maze = new SquareMaze(10, 20);
+        const renderer = new MazeRenderer(document.querySelector('canvas'), maze);
+        renderer.init();
+
+        const algorithm = randomGenerator(maze);
+        let isDone = false;
+        let interval;
+        function step() {
+            if (isDone) {
+                window.clearInterval(interval);
+                return;
+            }
+            const step = algorithm.next();
+            isDone = step.done;
+            const toHighlight = step.value;
+            renderer.render(toHighlight ? toHighlight : []);
+        }
+        interval = window.setInterval(step, 300);
+    </script>
+</html>
