@@ -94,6 +94,18 @@ export class MazeCell {
                 neighborId
             ))
     }
+
+    get neighbors() {
+        return this._graph.getNeighborIds(this._id)
+            .map(neighborId => new MazeCell(this._graph, neighborId))
+    }
+
+    boundaryBetween(cell) {
+        if (!this._graph.getNeighborIds(this._id).includes(cell.id)) {
+            throw new Error('Cannot get boundary; cells are not neighbors.')
+        }
+        return new MazeCellBoundary(this._graph, this._id, cell.id);
+    }
 }
 
 export class SquareMazeGraph {
@@ -153,7 +165,7 @@ export class SquareMazeGraph {
             y > 0 ? toAddr(x, y - 1) : null,
             x < (this._width - 1) ? toAddr(x + 1, y) : null,
             y < (this._height - 1) ? toAddr(x, y + 1) : null,
-        ].filter(x => !!x);
+        ].filter(x => x !== null);
     }
 
     _getWallAddress(smallerCellId, largerCellId) {

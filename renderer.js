@@ -54,7 +54,7 @@ export class MazeRenderer {
         ctx.fillStyle = 'orange';
         toHighlight.forEach(obj => {
             if (obj instanceof MazeCell) {
-                const { cellX, cellY } = cellIdToXY(obj.id);
+                const [ cellX, cellY ] = cellIdToXY(obj.id);
                 ctx.fillRect(cellX * cellSize, cellY * cellSize, cellSize, cellSize);
             }
         });
