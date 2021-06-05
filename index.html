@@ -13,11 +13,11 @@
             kruskalsAlgorithm
         } from './algorithms.js';
 
-        const maze = new SquareMazeGraph(20, 20);
+        const maze = new SquareMazeGraph(30, 40);
         const renderer = new MazeRenderer({
             canvas: document.querySelector('canvas'),
             maze: maze,
-            cellSize: 32,
+            cellSize: 24,
             strokeWidth: 4
         });
         renderer.init();
@@ -25,7 +25,7 @@
             maze,
             renderer,
             algorithm: kruskalsAlgorithm,
-            stepsPerTick: 5,
+            stepsPerTick: 20,
             tickSpeed: 0,
         })
         executor.run();
