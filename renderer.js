@@ -1,14 +1,14 @@
 import { MazeCell, MazeCellBoundary } from './graph.js';
 
-const cellSize = 20;
-
 export class MazeRenderer {
     _canvas;
     _maze;
+    _cellSize;
 
-    constructor(canvas, maze) {
+    constructor({ canvas, maze, cellSize = 20 }) {
         this._canvas = canvas;
         this._maze = maze;
+        this._cellSize = cellSize;
     }
 
     init() {
@@ -28,15 +28,15 @@ export class MazeRenderer {
                 // cells are horizontally adjacent
                 const [ cellX, cellY ] = cellIdToXY(boundary.secondId);
                 return [
-                    [ cellX * cellSize, cellY * cellSize],
-                    [ cellX * cellSize, (cellY + 1) * cellSize],
+                    [ cellX * this._cellSize, cellY * this._cellSize],
+                    [ cellX * this._cellSize, (cellY + 1) * this._cellSize],
                 ];
             } else {
                 // cells are vertically adjacent
                 const [ cellX, cellY ] = cellIdToXY(boundary.secondId);
                 return [
-                    [ cellX * cellSize, cellY * cellSize],
-                    [ (cellX + 1) * cellSize, cellY * cellSize],
+                    [ cellX * this._cellSize, cellY * this._cellSize],
+                    [ (cellX + 1) * this._cellSize, cellY * this._cellSize],
                 ];
             }
         }
@@ -55,7 +55,7 @@ export class MazeRenderer {
         toHighlight.forEach(obj => {
             if (obj instanceof MazeCell) {
                 const [ cellX, cellY ] = cellIdToXY(obj.id);
-                ctx.fillRect(cellX * cellSize, cellY * cellSize, cellSize, cellSize);
+                ctx.fillRect(cellX * this._cellSize, cellY * this._cellSize, this._cellSize, this._cellSize);
             }
         });
 
@@ -71,7 +71,7 @@ export class MazeRenderer {
         // draw maze outer edges
         ctx.strokeStyle = 'black';
         ctx.lineWidth = 1;
-        ctx.strokeRect(0, 0, this._maze.width * cellSize, this._maze.height * cellSize);
+        ctx.strokeRect(0, 0, this._maze.width * this._cellSize, this._maze.height * this._cellSize);
 
         // draw each wall
         const walls = this._maze.graph.boundaries().filter(b => b.isWall);

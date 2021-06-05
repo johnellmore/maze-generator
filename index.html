@@ -5,26 +5,24 @@
     <canvas width="600" height="600"></canvas>
     <script type="module">
         import { MazeRenderer } from './renderer.js';
+        import { MazeGenerationExecutor } from './executor.js';
         import { SquareMaze } from './graph.js';
         import { randomGenerator, randomDepthFirstSearchGenerator } from './algorithms.js';
 
         const maze = new SquareMaze(20, 20);
-        const renderer = new MazeRenderer(document.querySelector('canvas'), maze);
+        const renderer = new MazeRenderer({
+            canvas: document.querySelector('canvas'),
+            maze: maze,
+            cellSize: 30,
+        });
         renderer.init();
-
-        const algorithm = randomDepthFirstSearchGenerator(maze);
-        let isDone = false;
-        let interval;
-        function step() {
-            if (isDone) {
-                window.clearInterval(interval);
-                return;
-            }
-            const step = algorithm.next();
-            isDone = step.done;
-            const toHighlight = step.value;
-            renderer.render(toHighlight ? toHighlight : []);
-        }
-        interval = window.setInterval(step, 200);
+        const executor = new MazeGenerationExecutor({
+            maze,
+            renderer,
+            algorithm: randomDepthFirstSearchGenerator,
+            stepsPerTick: 1,
+            tickSpeed: 0,
+        })
+        executor.run();
     </script>
 </html>
