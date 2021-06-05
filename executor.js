@@ -21,22 +21,28 @@ export class MazeGenerationExecutor {
 
     step() {
         if (this._isDone) {
+            this._renderer.render([]);
             return;
         }
-        if (!this._algoGenerator) {
-            this._algoGenerator = this._algorithm(this._maze);
+        const toHighlight = this._stepAlgorithm(1);
+        this._renderer.render(toHighlight);
+    }
+
+    tick() {
+        if (this._isDone) {
+            this._renderer.render([]);
+            this._autoplay = false;
+            return;
         }
-        const step = this._algoGenerator.next();
-        this._isDone = step.done;
-        const toHighlight = step.value;
-        this._renderer.render(toHighlight ? toHighlight : []);
+        const toHighlight = this._stepAlgorithm(this._stepsPerTick);
+        this._renderer.render(toHighlight);
 
         // if we're autoplaying, queue up the next step
         if (this._autoplay) {
             if (this._tickSpeed <= 0) {
-                window.requestAnimationFrame(() => this.step());
+                window.requestAnimationFrame(() => this.tick());
             } else {
-                window.setTimeout(() => this.step(), this._tickSpeed);
+                window.setTimeout(() => this.tick(), this._tickSpeed);
             }
         }
     }
@@ -46,8 +52,26 @@ export class MazeGenerationExecutor {
             return;
         }
         this._autoplay = true;
-        this.step();
+        this.tick();
     }
 
-
+    _stepAlgorithm(numSteps) {
+        if (this._isDone) {
+            return;
+        }
+        if (!this._algoGenerator) {
+            this._algoGenerator = this._algorithm(this._maze);
+        }
+        const toHighlight = [];
+        for (let stepNum = 0; stepNum < numSteps; stepNum++) {
+            const step = this._algoGenerator.next();
+            toHighlight.push(...(step.value ? step.value : []));
+            if (step.done) {
+                this._isDone = true;
+                break;
+            }
+        }
+        
+        return toHighlight;
+    }
 }

@@ -2,25 +2,25 @@
 <meta charset="utf-8" />
 <link rel="icon" href="data:,">
 <html lang="en">
-    <canvas width="600" height="600"></canvas>
+    <canvas></canvas>
     <script type="module">
         import { MazeRenderer } from './renderer.js';
         import { MazeGenerationExecutor } from './executor.js';
         import { SquareMaze } from './graph.js';
         import { randomGenerator, randomDepthFirstSearchGenerator } from './algorithms.js';
 
-        const maze = new SquareMaze(20, 20);
+        const maze = new SquareMaze(30, 30);
         const renderer = new MazeRenderer({
             canvas: document.querySelector('canvas'),
             maze: maze,
-            cellSize: 30,
+            cellSize: 25,
         });
         renderer.init();
         const executor = new MazeGenerationExecutor({
             maze,
             renderer,
             algorithm: randomDepthFirstSearchGenerator,
-            stepsPerTick: 1,
+            stepsPerTick: 30,
             tickSpeed: 0,
         })
         executor.run();

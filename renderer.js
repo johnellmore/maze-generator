@@ -4,16 +4,25 @@ export class MazeRenderer {
     _canvas;
     _maze;
     _cellSize;
+    _strokeWidth;
 
-    constructor({ canvas, maze, cellSize = 20 }) {
+    constructor({ canvas, maze, cellSize = 20, strokeWidth = 2 }) {
         this._canvas = canvas;
         this._maze = maze;
         this._cellSize = cellSize;
+        this._strokeWidth = strokeWidth;
     }
 
     init() {
+        const borderExtraPadding = Math.ceil(this._strokeWidth / 2);
+        const mazeSize = [
+            this._maze.width * this._cellSize + borderExtraPadding * 2,
+            this._maze.height * this._cellSize + borderExtraPadding * 2
+        ];
+        this._canvas.width = mazeSize[0];
+        this._canvas.height = mazeSize[1];
         const ctx = this._canvas.getContext('2d');
-        ctx.translate(1, 1);
+        ctx.translate(borderExtraPadding, borderExtraPadding);
     }
 
     render(toHighlight) {
@@ -70,7 +79,7 @@ export class MazeRenderer {
 
         // draw maze outer edges
         ctx.strokeStyle = 'black';
-        ctx.lineWidth = 1;
+        ctx.lineWidth = this._strokeWidth;
         ctx.strokeRect(0, 0, this._maze.width * this._cellSize, this._maze.height * this._cellSize);
 
         // draw each wall
