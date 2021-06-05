@@ -14,15 +14,15 @@ export class MazeRenderer {
     }
 
     init() {
-        const borderExtraPadding = Math.ceil(this._strokeWidth / 2);
+        const halfStrokePx = Math.ceil(this._strokeWidth / 2);
         const mazeSize = [
-            this._maze.width * this._cellSize + borderExtraPadding * 2,
-            this._maze.height * this._cellSize + borderExtraPadding * 2
+            this._maze.width * this._cellSize + halfStrokePx * 2,
+            this._maze.height * this._cellSize + halfStrokePx * 2
         ];
         this._canvas.width = mazeSize[0];
         this._canvas.height = mazeSize[1];
         const ctx = this._canvas.getContext('2d');
-        ctx.translate(borderExtraPadding, borderExtraPadding);
+        ctx.translate(halfStrokePx, halfStrokePx);
     }
 
     render(toHighlight) {
@@ -57,7 +57,13 @@ export class MazeRenderer {
         }
 
         // clear canvas
-        ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+        const halfStrokePx = Math.ceil(this._strokeWidth / 2);
+        ctx.clearRect(
+            -1 * halfStrokePx,
+            -1 * halfStrokePx,
+            this._canvas.width + halfStrokePx * 2,
+            this._canvas.height + halfStrokePx * 2
+        );
 
         // draw any highlights behind cells
         ctx.fillStyle = 'orange';
@@ -70,7 +76,8 @@ export class MazeRenderer {
 
         // draw any highlights behind walls
         ctx.strokeStyle = 'orange';
-        ctx.lineWidth = 4;
+        ctx.lineCap = 'butt';
+        ctx.lineWidth = Math.ceil(this._strokeWidth * 1.5);
         toHighlight.forEach(obj => {
             if (obj instanceof MazeCellBoundary) {
                 strokeLine(...boundaryToEndpoints(obj));
@@ -79,8 +86,14 @@ export class MazeRenderer {
 
         // draw maze outer edges
         ctx.strokeStyle = 'black';
+        ctx.lineCap = 'square';
         ctx.lineWidth = this._strokeWidth;
-        ctx.strokeRect(0, 0, this._maze.width * this._cellSize, this._maze.height * this._cellSize);
+        const bottom = this._maze.height * this._cellSize;
+        const right = this._maze.width * this._cellSize;
+        strokeLine([0, 0], [0, bottom]);
+        strokeLine([0, bottom], [right - this._cellSize, bottom]);
+        strokeLine([this._cellSize, 0], [right, 0]);
+        strokeLine([right, 0], [right, bottom]);
 
         // draw each wall
         const walls = this._maze.graph.boundaries().filter(b => b.isWall);
