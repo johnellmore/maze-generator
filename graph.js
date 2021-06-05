@@ -1,31 +1,3 @@
-export class SquareMaze {
-    _graph;
-    _width;
-    _height;
-
-    constructor(width, height) {
-        this._graph = new SquareMazeGraph(width, height);
-        this._width = width;
-        this._height = height;
-    }
-
-    get graph() {
-        return this._graph;
-    }
-
-    get width() {
-        return this._width;
-    }
-
-    get height() {
-        return this._height;
-    }
-
-    cells() {
-        return this._graph.cells();
-    }
-}
-
 export class MazeCellBoundary {
     _graph;
     _firstId;
@@ -123,21 +95,29 @@ export class SquareMazeGraph {
         this._edges = new Uint8Array(width * height * 2);
     }
 
-    setAllBoundaries(shouldBeWalls) {
-        const fill = shouldBeWalls ? 1 : 0;
-        this._edges.fill(fill);
+    get width() {
+        return this._width;
     }
 
-    cells() {
+    get height() {
+        return this._height;
+    }
+
+    get cells() {
         // generate a range from [0..n]
         return [...Array(this._width * this._height).keys()]
             .map(id => new MazeCell(this, id));
     }
 
-    boundaries() {
-        return this.cells().flatMap(cell =>
+    get boundaries() {
+        return this.cells.flatMap(cell =>
             cell.boundaries.filter(b => b.firstId === cell.id)
         );
+    }
+
+    setAllBoundaries(shouldBeWalls) {
+        const fill = shouldBeWalls ? 1 : 0;
+        this._edges.fill(fill);
     }
 
     isWall(boundary) {

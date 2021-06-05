@@ -96,7 +96,7 @@ export class MazeRenderer {
         strokeLine([right, 0], [right, bottom]);
 
         // draw each wall
-        const walls = this._maze.graph.boundaries().filter(b => b.isWall);
+        const walls = this._maze.boundaries.filter(b => b.isWall);
         for (const boundary of walls) {
             strokeLine(...boundaryToEndpoints(boundary));
         }

@@ -6,23 +6,27 @@
     <script type="module">
         import { MazeRenderer } from './renderer.js';
         import { MazeGenerationExecutor } from './executor.js';
-        import { SquareMaze } from './graph.js';
-        import { randomGenerator, randomDepthFirstSearchGenerator } from './algorithms.js';
+        import { SquareMazeGraph } from './graph.js';
+        import {
+            random,
+            depthFirstSearch,
+            kruskalsAlgorithm
+        } from './algorithms.js';
 
-        const maze = new SquareMaze(50, 50);
+        const maze = new SquareMazeGraph(30, 30);
         const renderer = new MazeRenderer({
             canvas: document.querySelector('canvas'),
             maze: maze,
-            cellSize: 16,
-            strokeWidth: 8
+            cellSize: 20,
+            strokeWidth: 2
         });
         renderer.init();
         const executor = new MazeGenerationExecutor({
             maze,
             renderer,
-            algorithm: randomDepthFirstSearchGenerator,
-            stepsPerTick: 20,
-            tickSpeed: 20,
+            algorithm: depthFirstSearch,
+            stepsPerTick: 1,
+            tickSpeed: 0,
         })
         executor.run();
     </script>

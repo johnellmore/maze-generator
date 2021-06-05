@@ -1,14 +1,14 @@
-export function* randomGenerator(maze) {
-    for (const b of maze.graph.boundaries()) {
+export function* random(maze) {
+    for (const b of maze.boundaries) {
         b.isWall = Math.random() > 0.5;
         yield [b];
     }
 }
 
-export function* randomDepthFirstSearchGenerator(maze) {
-    maze.graph.setAllBoundaries(true);
+export function* depthFirstSearch(maze) {
+    maze.setAllBoundaries(true);
     const pickRandom = arr => arr[Math.floor(Math.random() * arr.length)];
-    const allCells = maze.graph.cells();
+    const allCells = maze.cells;
     const startCell = pickRandom(allCells);
 
     const backtrackStack = [startCell];
@@ -30,4 +30,8 @@ export function* randomDepthFirstSearchGenerator(maze) {
         wallToRemove.isWall = false;
         yield [wallToRemove];
     }
+}
+
+export function* kruskalsAlgorithm(maze) {
+
 }
