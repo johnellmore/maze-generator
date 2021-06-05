@@ -24,6 +24,13 @@ export class MazeCellBoundary {
         return this._secondId;
     }
 
+    get borderingCells() {
+        return [
+            new MazeCell(this._graph, this.firstId),
+            new MazeCell(this._graph, this.secondId),
+        ];
+    }
+
     get isWall() {
         return this._graph.isWall(this);
     }

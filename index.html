@@ -13,19 +13,19 @@
             kruskalsAlgorithm
         } from './algorithms.js';
 
-        const maze = new SquareMazeGraph(30, 30);
+        const maze = new SquareMazeGraph(20, 20);
         const renderer = new MazeRenderer({
             canvas: document.querySelector('canvas'),
             maze: maze,
-            cellSize: 20,
-            strokeWidth: 2
+            cellSize: 32,
+            strokeWidth: 4
         });
         renderer.init();
         const executor = new MazeGenerationExecutor({
             maze,
             renderer,
-            algorithm: depthFirstSearch,
-            stepsPerTick: 1,
+            algorithm: kruskalsAlgorithm,
+            stepsPerTick: 5,
             tickSpeed: 0,
         })
         executor.run();

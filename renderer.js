@@ -77,7 +77,7 @@ export class MazeRenderer {
         // draw any highlights behind walls
         ctx.strokeStyle = 'orange';
         ctx.lineCap = 'butt';
-        ctx.lineWidth = Math.ceil(this._strokeWidth * 1.5);
+        ctx.lineWidth = this._strokeWidth * 2;
         toHighlight.forEach(obj => {
             if (obj instanceof MazeCellBoundary) {
                 strokeLine(...boundaryToEndpoints(obj));
