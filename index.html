@@ -9,19 +9,19 @@
         import { SquareMaze } from './graph.js';
         import { randomGenerator, randomDepthFirstSearchGenerator } from './algorithms.js';
 
-        const maze = new SquareMaze(30, 8);
+        const maze = new SquareMaze(50, 50);
         const renderer = new MazeRenderer({
             canvas: document.querySelector('canvas'),
             maze: maze,
-            cellSize: 30,
-            strokeWidth: 6
+            cellSize: 16,
+            strokeWidth: 8
         });
         renderer.init();
         const executor = new MazeGenerationExecutor({
             maze,
             renderer,
             algorithm: randomDepthFirstSearchGenerator,
-            stepsPerTick: 1,
+            stepsPerTick: 20,
             tickSpeed: 20,
         })
         executor.run();
