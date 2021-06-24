@@ -1,33 +1,218 @@
 <!doctype html>
-<meta charset="utf-8" />
-<link rel="icon" href="data:,">
 <html lang="en">
-    <canvas></canvas>
+
+<head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="data:,">
+    <style type="text/css">
+        html {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        body {
+            margin: 0;
+        }
+
+        label {
+            display: block;
+        }
+
+        .interface {
+            display: flex;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            padding: 0.5em;
+        }
+
+        .controls {
+            width: 220px;
+            padding: 0.5em;
+        }
+
+        .mazepane {
+            padding: 0.5em;
+        }
+
+        .maze {
+            max-width: 100%;
+        }
+
+        .attribution {
+            font-size: 0.8em;
+        }
+
+        input[type=number] {
+            width: 4em;
+        }
+
+        @media print {
+
+            .controls,
+            .attribution {
+                display: none;
+            }
+
+            .interface {
+                padding: 0;
+            }
+
+            .mazepane {
+                padding: 0;
+            }
+
+            .maze {
+                max-height: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="interface">
+        <div class="controls">
+            <fieldset>
+                <legend>Maze</legend>
+                <label>
+                    Algorithm:
+                    <select id="algo">
+                        <option value="random">Totally random</option>
+                        <option value="depthFirstSearch">Depth-first</option>
+                        <option value="kruskalsAlgorithm">Kruskal's Algorithm</option>
+                        <option value="wilsonsAlgorithm">Wilson's Algorithm</option>
+                    </select>
+                </label>
+                <label>
+                    Maze dimensions:<br />
+                    <input id="mazex" type="number" value="15" />
+                    by
+                    <input id="mazey" type="number" value="20" />
+                    cells
+                </label>
+            </fieldset>
+            <fieldset>
+                <legend>Appearance</legend>
+                <label>
+                    Cell size (px):
+                    <input id="cellsize" type="number" value="24" />
+                </label>
+                <label>
+                    Borders (px):
+                    <input id="borderwidth" type="number" value="4" />
+                </label>
+            </fieldset>
+            <fieldset>
+                <legend>Animation</legend>
+                <label>
+                    Tick speed (ms):
+                    <input id="tickspeed" type="number" value="20" />
+                </label>
+                <label>
+                    Steps per tick:
+                    <input id="ticksteps" type="number" value="1" />
+                </label>
+            </fieldset>
+            <fieldset>
+                <legend>Controls</legend>
+                <button id="run">Run</button>
+                <button id="reset">Reset</button>
+                <button id="entire">Generate entirely</button>
+                <br /><br />
+                <button class="step" data-steps="1">Step</button>
+                <button class="step" data-steps="5">Step 5</button>
+                <button class="step" data-steps="20">Step 20</button>
+                <button class="step" data-steps="100">Step 100</button>
+            </fieldset>
+        </div>
+        <div class="mazepane">
+            <canvas class="maze"></canvas>
+            <p class="attribution">
+                For more background on these algorithms, read <a
+                    href="https://johnellmore.com/posts/20210622-maze-generation/">this blog post on maze generation
+                    algorithms</a>.
+            </p>
+            <p class="attribution">
+                This tool is released under the terms of the MIT License.
+            </p>
+        </div>
+    </div>
     <script type="module">
         import { MazeRenderer } from './renderer.js';
         import { MazeGenerationExecutor } from './executor.js';
-        import { SquareMazeGraph } from './graph.js';
+        import { SquareMazeGraph, MazeCellBoundary } from './graph.js';
         import {
             random,
             depthFirstSearch,
-            kruskalsAlgorithm
+            kruskalsAlgorithm,
+            wilsonsAlgorithm
         } from './algorithms.js';
 
-        const maze = new SquareMazeGraph(30, 40);
-        const renderer = new MazeRenderer({
-            canvas: document.querySelector('canvas'),
-            maze: maze,
-            cellSize: 24,
-            strokeWidth: 4
+        let maze, renderer, executor;
+
+        const clamp = (min, max) => (val) => Math.min(Math.max(val, min), max);
+        function init() {
+            if (executor) {
+                executor.stop();
+            }
+
+            const x = clamp(1, 50)
+                (parseInt(document.querySelector('#mazex').value));
+            const y = clamp(1, 50)
+                (parseInt(document.querySelector('#mazey').value));
+            maze = new SquareMazeGraph(x, y);
+
+            const cellSize = clamp(4, 80)
+                (parseInt(document.querySelector('#cellsize').value));
+            const strokeWidth = clamp(1, 20)
+                (parseInt(document.querySelector('#borderwidth').value));
+            renderer = new MazeRenderer({
+                canvas: document.querySelector('canvas'),
+                maze: maze,
+                cellSize,
+                strokeWidth,
+            });
+            renderer.init();
+
+            const algorithm = {
+                random,
+                depthFirstSearch,
+                kruskalsAlgorithm,
+                wilsonsAlgorithm
+            }[document.querySelector('#algo').value];
+            const stepsPerTick = clamp(1, 100)
+                (parseInt(document.querySelector('#ticksteps').value));
+            const tickSpeed = clamp(0, 5000)
+                (parseInt(document.querySelector('#tickspeed').value));
+            executor = new MazeGenerationExecutor({
+                maze,
+                renderer,
+                algorithm,
+                stepsPerTick,
+                tickSpeed,
+            });
+            renderer.render();
+        }
+
+        init();
+        document.body.addEventListener('change', (event) => {
+            if (event.target.matches('input, select')) {
+                init();
+            }
         });
-        renderer.init();
-        const executor = new MazeGenerationExecutor({
-            maze,
-            renderer,
-            algorithm: kruskalsAlgorithm,
-            stepsPerTick: 20,
-            tickSpeed: 0,
-        })
-        executor.run();
+
+        document.querySelector('#run')
+            .addEventListener('click', () => executor.run());
+        document.querySelector('#reset')
+            .addEventListener('click', () => executor.reset());
+        document.querySelector('#entire')
+            .addEventListener('click', () => executor.fullRun());
+
+        document.querySelectorAll('.step').forEach(el =>
+            el.addEventListener('click', () =>
+                executor.step(parseInt(el.dataset.steps)))
+        );
     </script>
+</body>
+
 </html>

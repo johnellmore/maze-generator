@@ -25,7 +25,7 @@ export class MazeRenderer {
         ctx.translate(halfStrokePx, halfStrokePx);
     }
 
-    render(toHighlight) {
+    render(toHighlight = []) {
         const ctx = this._canvas.getContext('2d');
 
         const cellIdToXY = (id) => [
