@@ -26,7 +26,6 @@ export class MazeGenerationExecutor {
     }
 
     step(numSteps = 1) {
-        console.log('eh');
         if (this._isDone) {
             this._renderer.render();
             return;
