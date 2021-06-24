@@ -8,7 +8,7 @@ This web app implements and demonstrates several maze generation algorithms.
 ## Intro
 
 The
-[Maze Generation Algorithms Wikipedia
+["Maze generation algorithm" Wikipedia
 article](https://en.wikipedia.org/wiki/Maze_generation_algorithm) is fascinating
 reading to get some background here. Effectively, most mazes are just graphs,
 with each "cell" beind a node in the graph and each opening (missing wall) being
