@@ -159,15 +159,15 @@
                 executor.stop();
             }
 
-            const x = clamp(1, 50)
+            const x = clamp(1, 200)
                 (parseInt(document.querySelector('#mazex').value));
-            const y = clamp(1, 50)
+            const y = clamp(1, 200)
                 (parseInt(document.querySelector('#mazey').value));
             maze = new SquareMazeGraph(x, y);
 
-            const cellSize = clamp(4, 80)
+            const cellSize = clamp(4, 300)
                 (parseInt(document.querySelector('#cellsize').value));
-            const strokeWidth = clamp(1, 20)
+            const strokeWidth = clamp(1, 200)
                 (parseInt(document.querySelector('#borderwidth').value));
             renderer = new MazeRenderer({
                 canvas: document.querySelector('canvas'),
